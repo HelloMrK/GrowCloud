@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Percentage Value Line Chart</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/layui/2.5.6/layui.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/layui/2.5.6/css/layui.min.css">
+</head>
+<body>
+<div id="chartContainer" style="width: 800px; height: 600px;"></div>
+<script>
+    layui.use(['element', 'laydate'], function () {
+        var element = layui.element;
+        var laydate = layui.laydate;
+        var responseDataList = [[${responseDataList}]];
+
+        // 处理数据
+        var data = [];
+        for (var i = 0; i < responseDataList.length; i++) {
+            var item = responseDataList[i];
+            data.push([item.currentTime, item.percentageValue]);
+        }
+
+        // 绘制折线图
+        laydate.render({
+            elem: '#chartContainer',
+            type: 'datetime',
+            range: true,
+            done: function (value) {
+                var filteredData = [];
+                var range = value.split(' - ');
+                var startTime = new Date(range[0]).getTime();
+                var endTime = new Date(range[1]).getTime();
+
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    var timestamp = new Date(item[0]).getTime();
+                    if (timestamp >= startTime && timestamp <= endTime) {
+                        filteredData.push(item);
+                    }
+                }
+
+                drawLineChart(filteredData);
+            }
+        });
+
+        drawLineChart(data);
+
+        function drawLineChart(data) {
+            layui.use('echarts', function () {
+                var echarts = layui.echarts;
+                var myChart = echarts.init(document.getElementById('chartContainer'));
+                var option = {
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    xAxis: {
+                        type: 'time'
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        type: 'line',
+                        data: data
+                    }]
+                };
+                myChart.setOption(option);
+            });
+        }
+    });
+</script>
+</body>
+</html>
