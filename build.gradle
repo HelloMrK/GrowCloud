@@ -1,18 +1,12 @@
 plugins {
+    id 'org.springframework.boot' version '2.5.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
-    id 'org.springframework.boot' version '3.1.0'
-    id 'io.spring.dependency-management' version '1.1.0'
 }
 
-group = 'indi.likai'
+group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
+sourceCompatibility = '11'
 
 repositories {
     mavenCentral()
@@ -20,11 +14,23 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.projectlombok:lombok'
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.4.2'
+    implementation 'mysql:mysql-connector-java:8.0.26'
+    implementation 'org.xerial:sqlite-jdbc:3.34.0'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'com.alibaba:fastjson:1.2.76'
+
 }
 
-tasks.named('test') {
+configurations {
+    runtimeClasspath {
+        extendsFrom compileClasspath
+    }
+}
+
+test {
     useJUnitPlatform()
 }
