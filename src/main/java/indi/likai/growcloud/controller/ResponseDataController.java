@@ -5,6 +5,7 @@ import indi.likai.growcloud.service.ResponseDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,8 +20,15 @@ public class ResponseDataController {
         this.responseDataService = responseDataService;
     }
 
+    @GetMapping("/getCurrResponseData")
+    public ResponseData getCurrResponseData(){
+        ResponseData responseData=responseDataService.getCurrResponseData();
+        return responseData;
+    }
     @GetMapping("/responseData")
-    public List<ResponseData> getResponseDataList() {
-        return responseDataService.list();
+    public List<ResponseData> getResponseDataList(@RequestParam("count") int count) {
+        List<ResponseData> responseDataList = responseDataService.list();
+        int startIndex = Math.max(0, responseDataList.size() - count);
+        return responseDataList.subList(startIndex, responseDataList.size());
     }
 }

@@ -13,8 +13,6 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class SchedulerTask {
-    private static final String API_URL = "http://10.0.0.231/";
-
     private final ResponseDataService responseDataService;
 
     @Autowired
@@ -24,18 +22,7 @@ public class SchedulerTask {
 
     @Scheduled(cron = "0 0 * * * *") // 每小时执行一次
     public void fetchDataAndSave() {
-        RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.getForObject(API_URL, String.class);
-        JSONObject jsonObject = JSONObject.parseObject(response);
-
-        ResponseData responseData = new ResponseData();
-        responseData.setSensorValue(jsonObject.getInteger("sensorValue"));
-        responseData.setPercentageValue(jsonObject.getDouble("percentageValue"));
-        String dateTimeString = jsonObject.getString("currentTime");
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, formatter);
-        responseData.setCurrentTime(dateTime);
-
+        ResponseData responseData= responseDataService.getCurrResponseData();
         responseDataService.save(responseData);
     }
 }

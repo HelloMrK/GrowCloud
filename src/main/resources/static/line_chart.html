@@ -7,23 +7,70 @@
     <style>
         #chartContainer {
             width: 90vw;
-            height: 90vh;
+            height: 70vh;
+        }
+
+        .lauyi {
+            /* 在这里定义lauyi样式 */
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .lauyi th, .lauyi td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .lauyi th {
+            background-color: #f2f2f2;
+        }
+
+        .lauyi tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .lauyi tr:hover {
+            background-color: #e6e6e6;
         }
     </style>
 </head>
 <body>
+<div>
+    <button onclick="fetchData(24)">24条</button>
+    <button onclick="fetchData(48)">48条</button>
+    <button onclick="fetchData(72)">72条</button>
+    <button onclick="fetchData(144)">144条</button>
+</div>
 <div id="chartContainer"></div>
+<div>
+    <h2>当前数据</h2>
+    <table id="currentData" class="lauyi">
+        <thead>
+        <tr>
+            <th>传感器原始数据</th>
+            <th>湿度百分比数据</th>
+            <th>获取时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 表格数据将在JavaScript中动态填充 -->
+        </tbody>
+    </table>
+</div>
 <script>
-    // 发送 AJAX 请求获取数据
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/api/responseData');
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            var responseDataList = JSON.parse(xhr.responseText);
-            processData(responseDataList);
-        }
-    };
-    xhr.send();
+    function fetchData(count) {
+        // 发送 AJAX 请求获取数据
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/responseData?count=' + count);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var responseDataList = JSON.parse(xhr.responseText);
+                processData(responseDataList);
+            }
+        };
+        xhr.send();
+    }
 
     function processData(responseDataList) {
         var data = [];
@@ -44,8 +91,10 @@
             tooltip: {
                 trigger: 'axis',
                 formatter: function (params) {
+
+                    var time = params[0].axisValueLabel;
                     var value = params[0].value[1];
-                    return params[0].name + ': ' + value + '%';
+                    return value + '  <br>  ' + time + '%';
                 }
             },
             xAxis: {
@@ -66,6 +115,37 @@
         };
         myChart.setOption(option);
     }
+    // 获取当前数据并填充表格
+    function fetchCurrentData() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/getCurrResponseData');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var responseData = JSON.parse(xhr.responseText);
+                renderCurrentData(responseData);
+            }
+        };
+        xhr.send();
+    }
+
+    // 将当前数据填充到表格中
+    function renderCurrentData(responseData) {
+        var tableBody = document.querySelector('#currentData tbody');
+        var row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${responseData.sensorValue}</td>
+            <td>${responseData.percentageValue}</td>
+            <td>${responseData.currentTime}</td>
+        `;
+        tableBody.innerHTML = ''; // 清空表格数据
+        tableBody.appendChild(row);
+    }
+
+    // 页面加载完成后获取当前数据和默认显示10条数据
+    window.onload = function () {
+        fetchCurrentData();
+        fetchData(24);
+    };
 </script>
 </body>
 </html>
